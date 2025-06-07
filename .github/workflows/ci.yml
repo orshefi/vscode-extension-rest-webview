@@ -27,9 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Bootstrap packages
-        run: npm run bootstrap
-
       - name: Build packages
         run: npm run build
 
@@ -54,9 +51,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Bootstrap packages
-        run: npm run bootstrap
 
       - name: Build packages
         run: npm run build

@@ -7,14 +7,14 @@
     "packages/*"
   ],
   "scripts": {
-    "bootstrap": "lerna bootstrap",
+    "bootstrap": "npm install",
     "build": "lerna run build",
     "dev": "lerna run dev --parallel",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint packages/*/src/**/*.ts",
     "lint:fix": "eslint packages/*/src/**/*.ts --fix",
-    "clean": "lerna run clean && lerna clean --yes",
+    "clean": "lerna run clean",
     "docs": "typedoc",
     "publish": "lerna publish",
     "publish:dry-run": "lerna publish --dry-run",
