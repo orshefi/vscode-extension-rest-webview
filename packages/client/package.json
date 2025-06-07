@@ -1,6 +1,6 @@
 {
   "name": "@vscode-rest/client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Client-side implementation for VS Code REST webview communication",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -34,7 +34,7 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@vscode-rest/shared": "^0.1.0"
+    "@vscode-rest/shared": "^0.1.1"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.0.0",
@@ -45,4 +45,4 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   }
-} 
+}
