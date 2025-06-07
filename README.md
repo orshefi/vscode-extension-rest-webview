@@ -251,7 +251,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
 This is a monorepo with three main packages:
 
 - **`@vscode-rest/server`**: Extension-side Fastify integration
-- **`@vscode-rest/client`**: Webview-side HTTP client  
+- **`@vscode-rest/client`**: Webview-side HTTP client
 - **`@vscode-rest/shared`**: Shared protocol and utilities
 
 ## 🏗️ Architecture
