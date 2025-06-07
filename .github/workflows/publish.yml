@@ -20,6 +20,11 @@ on:
           - major
           - prerelease
 
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+
 jobs:
   test:
     name: Test packages
@@ -53,6 +58,10 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -99,6 +108,8 @@ jobs:
     name: Create GitHub Release
     needs: publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
