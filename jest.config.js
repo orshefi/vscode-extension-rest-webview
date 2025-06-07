@@ -5,20 +5,18 @@ module.exports = {
       testMatch: ['<rootDir>/packages/server/**/*.test.ts'],
       testEnvironment: 'node',
       preset: 'ts-jest',
-      moduleNameMapping: {
+      moduleNameMapper: {
         '^@vscode-rest/shared/(.*)$': '<rootDir>/packages/shared/src/$1',
       },
-      setupFilesAfterEnv: ['<rootDir>/packages/server/jest.setup.ts'],
     },
     {
       displayName: 'client',
       testMatch: ['<rootDir>/packages/client/**/*.test.ts'],
       testEnvironment: 'jsdom',
       preset: 'ts-jest',
-      moduleNameMapping: {
+      moduleNameMapper: {
         '^@vscode-rest/shared/(.*)$': '<rootDir>/packages/shared/src/$1',
       },
-      setupFilesAfterEnv: ['<rootDir>/packages/client/jest.setup.ts'],
     },
     {
       displayName: 'shared',

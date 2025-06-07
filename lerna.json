@@ -1,37 +1,19 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "npmClient": "npm",
   "command": {
     "publish": {
       "conventionalCommits": true,
       "message": "chore(release): publish",
       "registry": "https://registry.npmjs.org/",
-      "ignoreChanges": [
-        "**/*.md",
-        "**/*.test.js",
-        "**/*.test.ts",
-        "**/test/**",
-        "**/tests/**"
-      ]
-    },
-    "bootstrap": {
-      "ignore": "component-*",
-      "npmClientArgs": ["--no-package-lock"]
+      "ignoreChanges": ["**/*.md", "**/*.test.js", "**/*.test.ts", "**/test/**", "**/tests/**"]
     },
     "version": {
       "allowBranch": ["main", "master"],
       "conventionalCommits": true,
       "message": "chore(release): publish",
-      "ignoreChanges": [
-        "**/*.md",
-        "**/*.test.js", 
-        "**/*.test.ts",
-        "**/test/**",
-        "**/tests/**"
-      ]
+      "ignoreChanges": ["**/*.md", "**/*.test.js", "**/*.test.ts", "**/test/**", "**/tests/**"]
     }
   },
-  "packages": [
-    "packages/*"
-  ]
-} 
+  "packages": ["packages/*"]
+}

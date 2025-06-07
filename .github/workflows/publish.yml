@@ -20,6 +20,11 @@ on:
           - major
           - prerelease
 
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+
 jobs:
   test:
     name: Test packages
@@ -39,9 +44,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Bootstrap packages
-        run: npm run bootstrap
-
       - name: Build packages
         run: npm run build
 
@@ -56,6 +58,12 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    outputs:
+      new_tag: ${{ steps.version_publish.outputs.new_tag }}
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -78,13 +86,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Bootstrap packages
-        run: npm run bootstrap
-
       - name: Build packages
         run: npm run build
 
       - name: Version and publish packages
+        id: version_publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -96,6 +102,11 @@ jobs:
             npx lerna version --conventional-commits --yes --no-push
             npx lerna publish from-git --yes
           fi
+          
+          # Get the new tag that was created
+          NEW_TAG=$(git describe --tags --abbrev=0)
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "Created new tag: $NEW_TAG"
 
       - name: Push version changes back to repository
         run: |
@@ -105,32 +116,29 @@ jobs:
     name: Create GitHub Release
     needs: publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: needs.publish.outputs.new_tag != ''
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Get latest tag
-        id: get_tag
-        run: |
-          TAG=$(git describe --tags --abbrev=0)
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-
       - name: Create Release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get_tag.outputs.tag }}
-          release_name: Release ${{ steps.get_tag.outputs.tag }}
+          tag_name: ${{ needs.publish.outputs.new_tag }}
+          release_name: Release ${{ needs.publish.outputs.new_tag }}
           body: |
             ## Changes in this release
             
             Published packages:
-            - @vscode-rest/shared@${{ steps.get_tag.outputs.tag }}
-            - @vscode-rest/client@${{ steps.get_tag.outputs.tag }}
-            - @vscode-rest/server@${{ steps.get_tag.outputs.tag }}
+            - @vscode-rest/shared@${{ needs.publish.outputs.new_tag }}
+            - @vscode-rest/client@${{ needs.publish.outputs.new_tag }}
+            - @vscode-rest/server@${{ needs.publish.outputs.new_tag }}
             
             For detailed changes, see the [CHANGELOG](CHANGELOG.md).
           draft: false
