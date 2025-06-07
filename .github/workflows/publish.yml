@@ -1,0 +1,137 @@
+name: Publish Packages
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'packages/**'
+      - 'package.json'
+      - 'lerna.json'
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+
+jobs:
+  test:
+    name: Test packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bootstrap packages
+        run: npm run bootstrap
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run linting
+        run: npm run lint
+
+  publish:
+    name: Publish to NPM
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bootstrap packages
+        run: npm run bootstrap
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Version and publish packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            npx lerna version ${{ github.event.inputs.version_type }} --yes --no-push
+            npx lerna publish from-git --yes
+          else
+            npx lerna version --conventional-commits --yes --no-push
+            npx lerna publish from-git --yes
+          fi
+
+      - name: Push version changes back to repository
+        run: |
+          git push --follow-tags origin HEAD:${{ github.ref_name }}
+
+  create-release:
+    name: Create GitHub Release
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          release_name: Release ${{ steps.get_tag.outputs.tag }}
+          body: |
+            ## Changes in this release
+            
+            Published packages:
+            - @vscode-rest/shared@${{ steps.get_tag.outputs.tag }}
+            - @vscode-rest/client@${{ steps.get_tag.outputs.tag }}
+            - @vscode-rest/server@${{ steps.get_tag.outputs.tag }}
+            
+            For detailed changes, see the [CHANGELOG](CHANGELOG.md).
+          draft: false
+          prerelease: false 

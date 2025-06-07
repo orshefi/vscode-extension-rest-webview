@@ -18,6 +18,19 @@
     "shared"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/orshefi/vscode-extension-rest-webview.git",
+    "directory": "packages/shared"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.0.0",
     "rimraf": "^5.0.0",

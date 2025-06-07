@@ -16,7 +16,12 @@
     "lint:fix": "eslint packages/*/src/**/*.ts --fix",
     "clean": "lerna run clean && lerna clean --yes",
     "docs": "typedoc",
-    "publish": "lerna publish"
+    "publish": "lerna publish",
+    "publish:dry-run": "lerna publish --dry-run",
+    "version": "lerna version",
+    "version:dry-run": "lerna version --dry-run",
+    "prerelease": "lerna version prerelease --preid beta",
+    "check-packages": "lerna exec -- npm pack --dry-run"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

@@ -19,6 +19,19 @@
     "webview"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/orshefi/vscode-extension-rest-webview.git",
+    "directory": "packages/server"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "dependencies": {
     "@vscode-rest/shared": "^0.1.0",
     "fastify": "^4.0.0"

@@ -4,11 +4,31 @@
   "command": {
     "publish": {
       "conventionalCommits": true,
-      "message": "chore(release): publish"
+      "message": "chore(release): publish",
+      "registry": "https://registry.npmjs.org/",
+      "ignoreChanges": [
+        "**/*.md",
+        "**/*.test.js",
+        "**/*.test.ts",
+        "**/test/**",
+        "**/tests/**"
+      ]
     },
     "bootstrap": {
       "ignore": "component-*",
       "npmClientArgs": ["--no-package-lock"]
+    },
+    "version": {
+      "allowBranch": ["main", "master"],
+      "conventionalCommits": true,
+      "message": "chore(release): publish",
+      "ignoreChanges": [
+        "**/*.md",
+        "**/*.test.js", 
+        "**/*.test.ts",
+        "**/test/**",
+        "**/tests/**"
+      ]
     }
   },
   "packages": [

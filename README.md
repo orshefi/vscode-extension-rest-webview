@@ -63,6 +63,84 @@ export function activate(context: vscode.ExtensionContext) {
 
 ### Webview Side (Client)
 
+First, install the client library in your extension project:
+
+```bash
+npm install @vscode-rest/client
+```
+
+#### Option 1: Using a Build Tool (Recommended)
+
+Create a webview TypeScript/JavaScript file:
+
+```typescript
+// src/webview/main.ts
+import { VSCodeHttpClient } from '@vscode-rest/client';
+
+const vscode = acquireVsCodeApi();
+const client = new VSCodeHttpClient(vscode);
+
+async function fetchData() {
+    try {
+        const response = await client.get('/api/hello');
+        const data = await response.json();
+        document.getElementById('result')!.textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('result')!.textContent = 'Error: ' + (error as Error).message;
+    }
+}
+
+async function postData() {
+    try {
+        const response = await client.post('/api/data', {
+            message: 'Hello from webview!',
+            timestamp: new Date().toISOString()
+        });
+        const data = await response.json();
+        document.getElementById('result')!.textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('result')!.textContent = 'Error: ' + (error as Error).message;
+    }
+}
+
+// Make functions globally available
+(globalThis as any).fetchData = fetchData;
+(globalThis as any).postData = postData;
+```
+
+Bundle with webpack, rollup, or your preferred bundler. Here's a sample webpack config for the webview:
+
+```javascript
+// webpack.webview.config.js
+const path = require('path');
+
+module.exports = {
+    entry: './src/webview/main.ts',
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
+            },
+        ],
+    },
+    resolve: {
+        extensions: ['.tsx', '.ts', '.js'],
+    },
+    output: {
+        filename: 'main.js',
+        path: path.resolve(__dirname, 'dist', 'webview'),
+    },
+    mode: 'development',
+    devtool: 'source-map',
+};
+```
+
+Then reference the bundled file:
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -70,68 +148,103 @@ export function activate(context: vscode.ExtensionContext) {
     <title>My Extension Webview</title>
 </head>
 <body>
-    <button onclick="fetchData()">Get Data</button>
+    <button onclick="fetchData()">Get Hello</button>
+    <button onclick="postData()">Post Data</button>
+    <div id="result"></div>
+    
+    <!-- Reference your bundled script -->
+    <script src="${scriptUri}"></script>
+</body>
+</html>
+```
+
+#### Option 2: Pre-bundled UMD (No Build Step)
+
+You can also use a pre-built UMD bundle by copying it to your extension's resources:
+
+```bash
+# Copy the UMD bundle to your extension
+cp node_modules/@vscode-rest/client/dist/index.umd.js src/webview/
+```
+
+Then reference it locally:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Extension Webview</title>
+</head>
+<body>
+    <button onclick="fetchData()">Get Hello</button>
+    <button onclick="postData()">Post Data</button>
     <div id="result"></div>
 
+    <script src="${clientScriptUri}"></script>
     <script>
-        // Include the client library (you'd normally bundle this)
-        // For now, we'll use the inline version from the example
-        
         const vscode = acquireVsCodeApi();
-        
-        // Simple HTTP client (use @vscode-rest/client in production)
-        class SimpleHttpClient {
-            constructor() {
-                this.pendingRequests = new Map();
-                window.addEventListener('message', (event) => {
-                    this.handleMessage(event.data);
-                });
-            }
-            
-            async fetch(url, options = {}) {
-                const method = options.method || 'GET';
-                const id = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-                
-                const message = {
-                    id, type: 'request', method, url,
-                    headers: options.headers,
-                    body: options.body,
-                    timestamp: Date.now()
-                };
-                
-                return new Promise((resolve, reject) => {
-                    this.pendingRequests.set(id, { resolve, reject });
-                    vscode.postMessage(message);
-                });
-            }
-            
-            handleMessage(message) {
-                if (message.type === 'response' && this.pendingRequests.has(message.id)) {
-                    const { resolve } = this.pendingRequests.get(message.id);
-                    this.pendingRequests.delete(message.id);
-                    resolve({
-                        status: message.status,
-                        json: () => Promise.resolve(message.body)
-                    });
-                }
-            }
-        }
-        
-        const client = new SimpleHttpClient();
+        const client = new VSCodeRest.VSCodeHttpClient(vscode);
         
         async function fetchData() {
             try {
-                const response = await client.fetch('/api/hello');
+                const response = await client.get('/api/hello');
                 const data = await response.json();
                 document.getElementById('result').textContent = JSON.stringify(data, null, 2);
             } catch (error) {
                 console.error('Error:', error);
+                document.getElementById('result').textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function postData() {
+            try {
+                const response = await client.post('/api/data', {
+                    message: 'Hello from webview!',
+                    timestamp: new Date().toISOString()
+                });
+                const data = await response.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = 'Error: ' + error.message;
             }
         }
     </script>
 </body>
 </html>
 ```
+
+#### Extension Code for Serving Scripts
+
+In your extension, you'll need to serve the script with proper URIs:
+
+```typescript
+// In your extension activation
+function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
+    // Option 1: Bundled script
+    const scriptUri = webview.asWebviewUri(
+        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'main.js')
+    );
+    
+    // Option 2: UMD script
+    const clientScriptUri = webview.asWebviewUri(
+        vscode.Uri.joinPath(extensionUri, 'src', 'webview', 'index.umd.js')
+    );
+
+    return `<!DOCTYPE html>
+    <html>
+    <head>
+        <title>My Extension Webview</title>
+    </head>
+    <body>
+        <button onclick="fetchData()">Get Hello</button>
+        <button onclick="postData()">Post Data</button>
+        <div id="result"></div>
+        
+        <script src="${scriptUri}"></script>
+    </body>
+    </html>`;
+}
 
 ## 📦 Packages
 
@@ -285,8 +398,11 @@ server.get('/api/data', async () => {
   return getMyData();
 });
 
-// Webview side - familiar fetch patterns  
-const response = await client.fetch('/api/data');
+// Webview side - familiar fetch patterns using @vscode-rest/client
+import { VSCodeHttpClient } from '@vscode-rest/client';
+
+const client = new VSCodeHttpClient();
+const response = await client.get('/api/data');
 const data = await response.json();
 ```
 
