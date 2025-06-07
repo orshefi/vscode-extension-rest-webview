@@ -1,0 +1,30 @@
+{
+  "name": "@vscode-rest/shared",
+  "version": "0.1.0",
+  "description": "Shared utilities and types for VS Code REST webview communication",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "clean": "rimraf dist",
+    "test": "jest"
+  },
+  "keywords": [
+    "vscode",
+    "webview",
+    "protocol",
+    "shared"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^11.0.0",
+    "rimraf": "^5.0.0",
+    "rollup": "^3.0.0",
+    "tslib": "^2.6.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+} 

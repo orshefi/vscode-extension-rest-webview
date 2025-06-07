@@ -1,0 +1,40 @@
+{
+  "name": "vscode-rest-webview-example",
+  "displayName": "VS Code REST Webview Example",
+  "description": "Example extension demonstrating VS Code REST webview communication",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:vscode-rest-webview-example.openWebview"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vscode-rest-webview-example.openWebview",
+        "title": "Open REST Webview Example"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.60.0",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@vscode-rest/server": "file:../../packages/server",
+    "@vscode-rest/client": "file:../../packages/client",
+    "fastify": "^4.0.0"
+  }
+} 

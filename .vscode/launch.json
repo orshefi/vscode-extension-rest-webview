@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Basic Extension Example",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/examples/basic-extension"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/examples/basic-extension/dist/**/*.js"
+      ],
+      "preLaunchTask": "npm: build - examples/basic-extension"
+    }
+  ]
+} 

@@ -1,0 +1,35 @@
+{
+  "name": "@vscode-rest/client",
+  "version": "0.1.0",
+  "description": "Client-side implementation for VS Code REST webview communication",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "browser": "dist/index.umd.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "clean": "rimraf dist",
+    "test": "jest"
+  },
+  "keywords": [
+    "vscode",
+    "webview",
+    "client",
+    "http",
+    "fetch"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@vscode-rest/shared": "^0.1.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^11.0.0",
+    "rimraf": "^5.0.0",
+    "rollup": "^3.0.0",
+    "tslib": "^2.6.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+} 
