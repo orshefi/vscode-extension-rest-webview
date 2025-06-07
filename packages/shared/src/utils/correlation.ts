@@ -1,4 +1,4 @@
-import { RequestMessage, ResponseMessage, ErrorMessage } from '../protocol/types';
+import { ResponseMessage, ErrorMessage } from '../protocol/types';
 
 /**
  * Generate a unique correlation ID for request/response matching

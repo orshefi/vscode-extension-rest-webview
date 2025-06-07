@@ -2,7 +2,6 @@ import {
   MessageProtocol,
   RequestMessage,
   ResponseMessage,
-  ErrorMessage,
   HttpMethod,
   HttpStatusCode,
   generateCorrelationId,

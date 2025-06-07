@@ -6,8 +6,7 @@ import {
   ResponseMessage, 
   ErrorMessage,
   TransportOptions,
-  isRequestMessage,
-  generateCorrelationId 
+  isRequestMessage
 } from '@vscode-rest/shared';
 
 /**
