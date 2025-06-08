@@ -22,15 +22,25 @@
     ]
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc -w",
+    "build": "npm run build:extension && npm run build:webview",
+    "build:extension": "tsc",
+    "build:webview": "webpack --config webpack.config.js",
+    "dev": "npm run dev:extension & npm run dev:webview",
+    "dev:extension": "tsc -w",
+    "dev:webview": "webpack --config webpack.config.js --watch",
     "clean": "rimraf dist"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
     "@types/vscode": "^1.60.0",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.5.3",
     "rimraf": "^5.0.0",
-    "typescript": "^5.0.0"
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.0.0",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "@vscode-rest/server": "file:../../packages/server",
