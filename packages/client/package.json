@@ -1,6 +1,6 @@
 {
   "name": "@vscode-rest/client",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Client-side implementation for VS Code REST webview communication",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
