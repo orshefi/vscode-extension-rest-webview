@@ -316,7 +316,6 @@ export class VSCodeHttpTransportServer extends EventEmitter {
   listen(port?: number, hostname?: string, backlog?: number, callback?: () => void): this {
     if (this._listening || this._disposed) {
       if (this._disposed) {
-        const error = new Error('Server has been disposed');
         if (callback) {
           process.nextTick(() => callback());
         }
