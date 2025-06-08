@@ -164,19 +164,11 @@ export class VSCodeHttpClient {
   private _pendingRequests = new Set<string>();
   private _instanceId: string;
 
-  constructor(vscode?: VSCodeAPI, optionsOrBaseUrl?: ClientOptions | string) {
+  constructor(vscode?: VSCodeAPI, options: ClientOptions = {}) {
     // Use global vscode API if available, otherwise require it to be passed
     this._vscode = vscode || (globalThis as any).acquireVsCodeApi?.();
     if (!this._vscode) {
       throw new Error('VS Code API not available. Make sure this is running in a VS Code webview.');
-    }
-
-    // Handle both old string baseUrl parameter and new options object for backward compatibility
-    let options: ClientOptions;
-    if (typeof optionsOrBaseUrl === 'string') {
-      options = { baseUrl: optionsOrBaseUrl };
-    } else {
-      options = optionsOrBaseUrl || {};
     }
 
     this._baseUrl = options.baseUrl || '';

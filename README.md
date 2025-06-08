@@ -437,14 +437,27 @@ Creates just the transport server (for advanced use cases).
 
 ### Client Side
 
-#### `createVSCodeHttpClient(config?)`
+#### `new VSCodeHttpClient(vscode?, options?)` or `createVSCodeHttpClient(config?)`
 
 Creates an HTTP client for webview communication.
 
 ```typescript
-interface VSCodeClientConfig {
+// Constructor options
+interface ClientOptions {
+  /** Custom instance ID to match server instance */
+  instanceId?: string;
+  /** Base URL for relative requests */
   baseUrl?: string;
-  vscode?: VSCodeAPI; // Optional, auto-detected
+}
+
+// Factory function config
+interface VSCodeClientConfig {
+  /** Base URL for relative requests */
+  baseUrl?: string;
+  /** Custom instance ID to match server instance */
+  instanceId?: string;
+  /** VS Code API instance (optional, will use global if available) */
+  vscode?: any;
 }
 ```
 
