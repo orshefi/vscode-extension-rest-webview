@@ -57,6 +57,9 @@ export interface MessageProtocol {
   /** Error stack trace (for debugging) */
   stack?: string;
   
+  /** Instance ID for routing between multiple servers/clients */
+  instanceId?: string;
+  
   /** Timestamp for debugging and lifecycle management */
   timestamp: number;
 }

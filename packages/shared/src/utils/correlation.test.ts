@@ -44,7 +44,7 @@ describe('Correlation Utilities', () => {
       expect(manager.getPendingCount()).toBe(1);
     });
 
-    it('should resolve pending requests', () => {
+    it('should resolve pending requests', async () => {
       const id = 'test-id';
       const resolve = jest.fn();
       const reject = jest.fn();
@@ -59,12 +59,16 @@ describe('Correlation Utilities', () => {
       const resolved = manager.resolveRequest(id, response);
 
       expect(resolved).toBe(true);
+      expect(manager.getPendingCount()).toBe(0);
+      
+      // Wait for next tick since callbacks are called asynchronously
+      await new Promise(resolve => process.nextTick(resolve));
+      
       expect(resolve).toHaveBeenCalledWith(response);
       expect(reject).not.toHaveBeenCalled();
-      expect(manager.getPendingCount()).toBe(0);
     });
 
-    it('should reject pending requests', () => {
+    it('should reject pending requests', async () => {
       const id = 'test-id';
       const resolve = jest.fn();
       const reject = jest.fn();
@@ -80,9 +84,13 @@ describe('Correlation Utilities', () => {
       const rejected = manager.rejectRequest(id, error);
 
       expect(rejected).toBe(true);
+      expect(manager.getPendingCount()).toBe(0);
+      
+      // Wait for next tick since callbacks are called asynchronously
+      await new Promise(resolve => process.nextTick(resolve));
+      
       expect(reject).toHaveBeenCalledWith(error);
       expect(resolve).not.toHaveBeenCalled();
-      expect(manager.getPendingCount()).toBe(0);
     });
 
     it('should handle non-existent request IDs', () => {

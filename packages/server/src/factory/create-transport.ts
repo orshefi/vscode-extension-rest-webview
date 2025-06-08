@@ -21,6 +21,8 @@ export function createVSCodeTransport(config: VSCodeTransportConfig): VSCodeHttp
   return new VSCodeHttpTransportServer(config.webview, config.options);
 }
 
+
+
 /**
  * Create a complete Fastify instance with VS Code transport
  * 
@@ -43,14 +45,34 @@ export function createVSCodeFastify(config: VSCodeTransportConfig) {
   // Create Fastify instance with serverFactory
   const server = Fastify({
     serverFactory: (handler: any) => {
-      // Remove any existing listeners first to prevent duplicates
+      // Ensure clean state before setting up new handler
       transport.removeAllListeners('request');
+      
       // Add the new handler
       transport.on('request', handler);
+      
       return transport as any; // Type assertion needed for compatibility
     },
     logger: config.options?.development?.logging === 'debug'
   });
 
+  // Enhance the server with disposal tracking
+  const originalClose = server.close.bind(server);
+  server.close = function(closeListener?: () => void): any {
+    // Ensure transport is properly cleaned up
+    if (!transport.isDisposed()) {
+      transport.close();
+    }
+    
+    // Call original close method with proper binding
+    if (closeListener) {
+      return originalClose(closeListener);
+    } else {
+      return originalClose();
+    }
+  };
+
   return server;
-} 
+}
+
+ 
