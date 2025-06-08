@@ -292,6 +292,99 @@ To run the example:
 5. Run "Open REST Webview Example"
 6. Try the buttons to test the HTTP-like communication!
 
+## 🆔 Multiple Servers & Instance IDs
+
+When creating multiple servers (e.g., in CustomEditorProvider), you need to coordinate instance IDs between client and server to avoid message routing conflicts.
+
+### Problem
+Multiple servers can cause instance ID mismatches where:
+- Request comes from client with one instance ID
+- Response comes back from a different server with a different instance ID
+- Client rejects the response due to ID mismatch
+
+### Solution: Custom Instance IDs
+
+#### Extension Side (Server)
+```typescript
+import { createVSCodeTransport } from '@vscode-rest/server';
+
+class MyCustomEditorProvider implements vscode.CustomEditorProvider {
+  async resolveCustomEditor(document: vscode.CustomDocument, webviewPanel: vscode.WebviewPanel) {
+    // Create unique instance ID for this editor
+    const instanceId = `editor_${document.uri.toString()}`;
+    
+    // Create server with custom instance ID
+    const server = createVSCodeTransport({
+      webview: webviewPanel.webview,
+      options: {
+        instanceId: instanceId
+      }
+    });
+    
+    // Pass the instanceId to the webview
+    webviewPanel.webview.html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <script>
+          window.SERVER_INSTANCE_ID = '${instanceId}';
+        </script>
+      </head>
+      <body>
+        <script src="client.js"></script>
+      </body>
+      </html>
+    `;
+  }
+}
+```
+
+#### Webview Side (Client)
+```typescript
+import { VSCodeHttpClient } from '@vscode-rest/client';
+
+// Get the instance ID that was passed from the extension
+const instanceId = (window as any).SERVER_INSTANCE_ID;
+
+// Create client with matching instance ID
+const client = new VSCodeHttpClient(undefined, {
+  instanceId: instanceId
+});
+
+// Now requests and responses will have matching instance IDs
+const response = await client.get('/api/data');
+```
+
+#### Multiple Servers Example
+```typescript
+// Extension side - multiple servers for different purposes
+const apiServer = createVSCodeTransport({
+  webview: panel.webview,
+  options: { instanceId: 'api-server' }
+});
+
+const fileServer = createVSCodeTransport({
+  webview: panel.webview,
+  options: { instanceId: 'file-server' }
+});
+
+// Webview side - corresponding clients
+const apiClient = new VSCodeHttpClient(undefined, {
+  instanceId: 'api-server'
+});
+
+const fileClient = new VSCodeHttpClient(undefined, {
+  instanceId: 'file-server'
+});
+```
+
+### Benefits
+- ✅ No instance ID mismatches
+- ✅ Multiple editors work independently  
+- ✅ Predictable, debuggable instance IDs
+- ✅ Full control over server/client pairing
+- ✅ Backward compatible (auto-generates IDs if not provided)
+
 ## 🔧 Development
 
 ### Building

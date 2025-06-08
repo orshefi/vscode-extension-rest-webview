@@ -143,6 +143,16 @@ export interface RequestOptions {
 }
 
 /**
+ * Configuration options for the HTTP client
+ */
+export interface ClientOptions {
+  /** Custom instance ID to match server instance */
+  instanceId?: string;
+  /** Base URL for relative requests */
+  baseUrl?: string;
+}
+
+/**
  * VS Code HTTP Client - provides fetch-like API for webview communication
  */
 export class VSCodeHttpClient {
@@ -154,16 +164,26 @@ export class VSCodeHttpClient {
   private _pendingRequests = new Set<string>();
   private _instanceId: string;
 
-  constructor(vscode?: VSCodeAPI, baseUrl: string = '') {
+  constructor(vscode?: VSCodeAPI, optionsOrBaseUrl?: ClientOptions | string) {
     // Use global vscode API if available, otherwise require it to be passed
     this._vscode = vscode || (globalThis as any).acquireVsCodeApi?.();
     if (!this._vscode) {
       throw new Error('VS Code API not available. Make sure this is running in a VS Code webview.');
     }
 
-    this._baseUrl = baseUrl;
+    // Handle both old string baseUrl parameter and new options object for backward compatibility
+    let options: ClientOptions;
+    if (typeof optionsOrBaseUrl === 'string') {
+      options = { baseUrl: optionsOrBaseUrl };
+    } else {
+      options = optionsOrBaseUrl || {};
+    }
+
+    this._baseUrl = options.baseUrl || '';
     this._correlationManager = new CorrelationManager();
-    this._instanceId = `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Use provided instanceId or generate one
+    this._instanceId = options.instanceId || `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Check for existing clients
     if (globalClientRegistry.size > 0) {
