@@ -89,14 +89,14 @@ export class CorrelationManager {
 
     this.clearRequest(id);
     
-    // Safely call resolve in next tick to prevent synchronous errors
-    process.nextTick(() => {
+    // Safely call resolve asynchronously to prevent synchronous errors
+    setTimeout(() => {
       try {
         request.resolve(response);
       } catch (error) {
         console.warn(`[CorrelationManager] Error in resolve callback for ${id}:`, error);
       }
-    });
+    }, 0);
     
     return true;
   }
@@ -116,14 +116,14 @@ export class CorrelationManager {
 
     this.clearRequest(id);
     
-    // Safely call reject in next tick to prevent synchronous errors
-    process.nextTick(() => {
+    // Safely call reject asynchronously to prevent synchronous errors
+    setTimeout(() => {
       try {
         request.reject(error);
       } catch (callbackError) {
         console.warn(`[CorrelationManager] Error in reject callback for ${id}:`, callbackError);
       }
-    });
+    }, 0);
     
     return true;
   }
@@ -168,14 +168,14 @@ export class CorrelationManager {
       
       error.id = id;
       
-      // Safely call reject in next tick
-      process.nextTick(() => {
+      // Safely call reject asynchronously
+      setTimeout(() => {
         try {
           request.reject(error);
         } catch (callbackError) {
           console.warn(`[CorrelationManager] Error in reject callback during disposal for ${id}:`, callbackError);
         }
-      });
+      }, 0);
     }
   }
 

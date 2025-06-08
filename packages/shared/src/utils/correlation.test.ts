@@ -61,8 +61,8 @@ describe('Correlation Utilities', () => {
       expect(resolved).toBe(true);
       expect(manager.getPendingCount()).toBe(0);
       
-      // Wait for next tick since callbacks are called asynchronously
-      await new Promise(resolve => process.nextTick(resolve));
+      // Wait for async callback since callbacks are called with setTimeout
+      await new Promise(resolve => setTimeout(resolve, 0));
       
       expect(resolve).toHaveBeenCalledWith(response);
       expect(reject).not.toHaveBeenCalled();
@@ -86,8 +86,8 @@ describe('Correlation Utilities', () => {
       expect(rejected).toBe(true);
       expect(manager.getPendingCount()).toBe(0);
       
-      // Wait for next tick since callbacks are called asynchronously
-      await new Promise(resolve => process.nextTick(resolve));
+      // Wait for async callback since callbacks are called with setTimeout
+      await new Promise(resolve => setTimeout(resolve, 0));
       
       expect(reject).toHaveBeenCalledWith(error);
       expect(resolve).not.toHaveBeenCalled();
