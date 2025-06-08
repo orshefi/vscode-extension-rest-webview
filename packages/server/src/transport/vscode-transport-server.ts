@@ -9,10 +9,7 @@ import {
   isRequestMessage
 } from '@vscode-rest/shared';
 
-/**
- * Global instance registry to prevent multiple servers on same webview
- */
-const webviewServerRegistry = new WeakMap<vscode.Webview, VSCodeHttpTransportServer>();
+
 
 
 
@@ -295,19 +292,13 @@ export class VSCodeHttpTransportServer extends EventEmitter {
     super();
     this._webview = webview;
     this._options = options;
-    this._instanceId = `server_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Use provided instanceId or generate one
+    this._instanceId = options.instanceId || `server_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // Check for existing server on this webview
-    const existingServer = webviewServerRegistry.get(webview);
-    if (existingServer && !existingServer.isDisposed()) {
-      console.warn('[VSCodeHttpTransportServer] Warning: Multiple servers detected on same webview. This may cause conflicts.');
-      if (options.development?.logging === 'debug') {
-        console.warn('[VSCodeHttpTransportServer] Consider using a single server instance per webview.');
-      }
+    if (options.development?.logging === 'debug') {
+      console.log(`[VSCodeHttpTransportServer:${this._instanceId}] Server created`);
     }
-
-    // Register this instance
-    webviewServerRegistry.set(webview, this);
   }
 
   /**
@@ -378,11 +369,7 @@ export class VSCodeHttpTransportServer extends EventEmitter {
     this._disposables.forEach(d => d.dispose());
     this._disposables = [];
 
-    // Remove from registry if this is the registered instance
-    const registeredServer = webviewServerRegistry.get(this._webview);
-    if (registeredServer === this) {
-      webviewServerRegistry.delete(this._webview);
-    }
+    // Server cleanup - no registry needed with instanceId approach
 
     // Remove all event listeners to prevent memory leaks
     this.removeAllListeners();
@@ -413,12 +400,7 @@ export class VSCodeHttpTransportServer extends EventEmitter {
       return; // Ignore non-request messages
     }
 
-    // Check if this server is the primary handler for this webview
-    const registeredServer = webviewServerRegistry.get(this._webview);
-    if (registeredServer !== this && registeredServer && !registeredServer.isDisposed()) {
-      // Let the registered server handle this message
-      return;
-    }
+    // Handle message directly - instanceId filtering happens on client side
 
     // Set lock to prevent concurrent execution
     this._messageHandlerLock = true;
@@ -504,10 +486,10 @@ export class VSCodeHttpTransportServer extends EventEmitter {
 
   /**
    * Check if this is the primary server for the webview
+   * @deprecated No longer applicable with instanceId-based approach
    */
   isPrimaryServer(): boolean {
-    const registeredServer = webviewServerRegistry.get(this._webview);
-    return registeredServer === this;
+    return true; // All servers are equal with instanceId approach
   }
 
   /**

@@ -107,6 +107,9 @@ export interface TransportOptions {
   
   /** Maximum message size in bytes */
   maxMessageSize?: number;
+  
+  /** Custom instance ID for server identification (useful for multiple servers per webview) */
+  instanceId?: string;
 }
 
 /**

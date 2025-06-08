@@ -48,4 +48,26 @@ describe('createVSCodeTransport', () => {
     expect(transport).toBeDefined();
     expect(transport.listening).toBe(false);
   });
+
+  it('should accept custom instanceId', () => {
+    const customInstanceId = 'editor-unique-123';
+    const transport = createVSCodeTransport({
+      webview: mockWebview as any,
+      options: {
+        instanceId: customInstanceId
+      }
+    });
+    
+    expect(transport).toBeDefined();
+    expect(transport.getInstanceId()).toBe(customInstanceId);
+  });
+
+  it('should generate instanceId when not provided', () => {
+    const transport = createVSCodeTransport({
+      webview: mockWebview as any
+    });
+    
+    expect(transport).toBeDefined();
+    expect(transport.getInstanceId()).toMatch(/^server_\d+_[a-z0-9]+$/);
+  });
 }); 
